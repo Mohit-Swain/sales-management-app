@@ -1,0 +1,96 @@
+{% extends 'base.html' %} {% load static %} {%block title%}Register{%endblock%}
+{%block content%}
+<div class="container">
+	<div class="row gx-5">
+		<div class="col col-lg-5 d-none d-md-block bg-light rounded">
+			<div class="row p-4">
+				<h1 class="display-6 fw-bold">Registation Page</h1>
+			</div>
+			<div class="row p-4">
+				<span class="fs-4" style="color: #566474">
+					Please register yourself and wait for the admins to approve you
+				</span>
+			</div>
+			<div class="row p-4">
+				<img
+					src="{%static 'authentication/register.svg'%}"
+					alt="register svg"
+				/>
+			</div>
+		</div>
+		<div
+			class="col col-lg-7 p-4 d-flex justify-content-center align-items-center"
+		>
+			<div
+				class="col col-lg-8 col-xl-7 container rounded-2 border py-4 shadow"
+				style="border-color: #dfe0e0"
+			>
+				<div class="row">
+					<h5 class="py-4">Register a new account</h5>
+				</div>
+				<div class="row">
+					{% comment %} first_name, last_name, email, password, confirm
+					password, phone number {% endcomment %}
+					<form>
+						<div class="row mb-3">
+							<div class="col">
+								<input
+									type="text"
+									class="form-control"
+									name="first_name"
+									placeholder="First name"
+								/>
+							</div>
+							<div class="col">
+								<input
+									type="text"
+									class="form-control"
+									name="last_name"
+									placeholder="Last name"
+								/>
+							</div>
+						</div>
+
+						<div class="mb-3">
+							<input
+								type="email"
+								class="form-control"
+								aria-describedby="emailHelp"
+								name="email"
+								placeholder="Enter email address"
+							/>
+						</div>
+						<div class="mb-3">
+							<input
+								type="password"
+								class="form-control"
+								name="password"
+								placeholder="Enter Password"
+							/>
+						</div>
+						<div class="mb-3">
+							<input
+								type="password"
+								class="form-control"
+								name="password1"
+								placeholder="Confirm Password"
+							/>
+						</div>
+						<div class="mb-3">
+							<input
+								type="number"
+								class="form-control"
+								name="phone_no"
+								placeholder="Phone No."
+							/>
+						</div>
+						<button type="submit" class="btn btn-primary w-100 mt-5 mb-4">
+							Register
+						</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{%endblock%}

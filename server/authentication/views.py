@@ -4,10 +4,9 @@ from django.http import HttpResponse
 
 def home(request):
   return redirect('login')
-  
+
 def login(request):
   return render(request,'authentication/login.html')
 
-
-def handle404(request):
-  return render(request,'404.html')
+def register(request):
+  return render(request,'authentication/register.html')
