@@ -4,11 +4,11 @@
 	<div class="row gx-5">
 		<div class="col col-lg-5 d-none d-md-block bg-light rounded">
 			<div class="row p-4">
-				<h1 class="display-6 fw-bold">Registation Page</h1>
+				<h1 class="display-6 fw-bold">Welcome to your Dashboard</h1>
 			</div>
 			<div class="row p-4">
 				<span class="fs-4" style="color: #566474">
-					Please register yourself and wait for the admins to approve you
+					This is the homepage of lead management system, login now to begin
 				</span>
 			</div>
 			<div class="row p-4">
@@ -31,7 +31,8 @@
 				<div class="row">
 					{% comment %} first_name, last_name, email, password, confirm
 					password, phone number {% endcomment %}
-					<form>
+					<form class="d-flex flex-column justify-content-center" method='POST' action='{% url 'register' %}'>
+            {% csrf_token %}
 						<div class="row mb-3">
 							<div class="col">
 								<input
@@ -60,6 +61,14 @@
 								placeholder="Enter email address"
 							/>
 						</div>
+            <div class="mb-3">
+              <input
+                type="number"
+                class="form-control"
+                name="phone_no"
+                placeholder="Phone No."
+              />
+            </div>
 						<div class="mb-3">
 							<input
 								type="password"
@@ -76,17 +85,12 @@
 								placeholder="Confirm Password"
 							/>
 						</div>
-						<div class="mb-3">
-							<input
-								type="number"
-								class="form-control"
-								name="phone_no"
-								placeholder="Phone No."
-							/>
-						</div>
-						<button type="submit" class="btn btn-primary w-100 mt-5 mb-4">
+						<button type="submit" class="btn btn-primary w-100 my-4">
 							Register
 						</button>
+            <div class="mb-3 align-self-center">
+							Already have an account? <a class="text-decoration-none" href="{% url 'login' %}">Login&nbsp;Now</a>
+						</div>
 					</form>
 				</div>
 			</div>

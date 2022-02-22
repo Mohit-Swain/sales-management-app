@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
-from django.utils import timezone
 # Create your models here.
 
 class MyUserManager(UserManager):
@@ -29,13 +28,14 @@ class MyUserManager(UserManager):
     extra_fields['is_superuser'] = True
     extra_fields['is_staff'] = True
     extra_fields['is_approved'] = True
-
+    extra_fields['user_type'] = 'SA'
     return self.create_user(email,first_name,last_name,password,**extra_fields)
 
 class User(AbstractUser):
   username = None
+  # created_at is same as date_joined
   email = models.EmailField('email address', unique=True)
-  phone_number = models.DecimalField(max_digits=10,decimal_places=0,null=True)
+  phone_number = models.DecimalField(max_digits=10,decimal_places=0,null=True,blank=True)
   is_approved = models.BooleanField(default=False)
 
   SALES_ADMIN = 'SA'
@@ -49,11 +49,10 @@ class User(AbstractUser):
 
   manager_id = models.ForeignKey('self',
                                   on_delete=models.SET_NULL,
-                                  limit_choices_to={'user_type' : SALES_ADMIN},
-                                  related_name='managed_users',
                                   null=True,
-                                  default=None
+                                  blank=True
                                 )
+  profile = models.ImageField(null=True,blank=True)
   objects = MyUserManager()
 
   USERNAME_FIELD = 'email'
@@ -65,8 +64,8 @@ class User(AbstractUser):
 
 
 class Lead(models.Model):
-  created_at = models.DateTimeField(default=timezone.now)
-  updated_at = models.DateTimeField(default=timezone.now)
+  created_at = models.DateTimeField(auto_now_add=True)
+  updated_at = models.DateTimeField(auto_now=True)
   name = models.CharField(max_length=150)
   email = models.EmailField(
       max_length=255,
@@ -85,11 +84,11 @@ class Lead(models.Model):
     (MEDIUM,'medium'),
     (SOLD,'sold')
   ]
-  state = models.CharField(max_length=4,choices=LEAD_STATE,null=True,default=None)
-  user_id = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,default=None)
+  state = models.CharField(max_length=4,choices=LEAD_STATE,null=True,blank=True,default=None)
+  user_id = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True,default=None)
 
 class Remark(models.Model):
-  created_at = models.DateTimeField(default=timezone.now)
+  created_at = models.DateTimeField(auto_now_add=True)
   remark = models.TextField()
   lead_id = models.ForeignKey(Lead,on_delete=models.CASCADE)
   user_id = models.ForeignKey(User,on_delete=models.CASCADE)

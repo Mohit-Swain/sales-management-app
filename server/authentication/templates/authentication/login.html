@@ -26,7 +26,7 @@
 					<h5 class="py-4">Login into your account</h5>
 				</div>
 				<div class="row">
-					<form>
+					<form class="d-flex flex-column">
 						<div class="mb-3">
 							<input
 								type="email"
@@ -44,9 +44,15 @@
 								placeholder="Enter Password"
 							/>
 						</div>
-						<button type="submit" class="btn btn-primary w-100 mt-5 mb-4">
+						<button type="submit" class="btn btn-primary w-100 my-4">
 							Login now
 						</button>
+						<div class="mb-3 align-self-center">
+							New Here?
+							<a class="text-decoration-none" href="{% url 'register' %}"
+								>Register&nbsp;Now</a
+							>
+						</div>
 					</form>
 				</div>
 			</div>
