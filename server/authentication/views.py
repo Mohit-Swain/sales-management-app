@@ -5,10 +5,10 @@ from .forms import CustomUserCreationForm, LoginForm
 from .models import User
 # Create your views here.
 
-def home(request):
+def homeView(request):
   return redirect('login')
 
-def login(request):
+def loginView(request):
   if request.method == 'POST':
     form = LoginForm(request.POST)
     if form.is_valid():      
@@ -30,7 +30,7 @@ def login(request):
     'form' : form
   })
 
-def register(request):
+def registerView(request):
   if request.method == 'POST':
     form = CustomUserCreationForm(request.POST)
     if form.is_valid():
@@ -48,14 +48,14 @@ def register(request):
       for error_field in form.errors:
         for error in form.errors[error_field]:
           messages.error(request,error)
-        
-
   else:
     form = CustomUserCreationForm()
+
   return render(request,'authentication/register.html',{
     'form' : form
   })
 
-def logout_view(request):
-  return logout(request)
+def logoutView(request):
+  logout(request)
+  return redirect('home')
   
