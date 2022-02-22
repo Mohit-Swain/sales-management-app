@@ -26,24 +26,10 @@
 					<h5 class="py-4">Login into your account</h5>
 				</div>
 				<div class="row">
-					<form class="d-flex flex-column">
-						<div class="mb-3">
-							<input
-								type="email"
-								class="form-control"
-								aria-describedby="emailHelp"
-								name="email"
-								placeholder="Enter email address"
-							/>
-						</div>
-						<div class="mb-3">
-							<input
-								type="password"
-								class="form-control"
-								name="password"
-								placeholder="Enter Password"
-							/>
-						</div>
+					<form class="d-flex flex-column" method="POST" action={% url 'login'%}>
+            {% csrf_token %}
+						<div class="mb-3">{{form.email}}</div>
+						<div class="mb-3">{{form.password}}</div>
 						<button type="submit" class="btn btn-primary w-100 my-4">
 							Login now
 						</button>

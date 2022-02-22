@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser, UserManager
 # Create your models here.
 
 class MyUserManager(UserManager):
-  def create_user(self,email,first_name=None,last_name=None,password=None, **extra_fields):
+  def create_user(self,email,first_name,last_name,password, **extra_fields):
     if not email:
       raise ValueError('Users must have an Email address')
     if not first_name:
@@ -34,8 +34,10 @@ class MyUserManager(UserManager):
 class User(AbstractUser):
   username = None
   # created_at is same as date_joined
+  first_name = models.CharField('first name', max_length=150)
+  last_name = models.CharField('last name', max_length=150)
   email = models.EmailField('email address', unique=True)
-  phone_number = models.DecimalField(max_digits=10,decimal_places=0,null=True,blank=True)
+  phone_number = models.DecimalField('Phone no',max_digits=10,decimal_places=0,null=True,blank=True)
   is_approved = models.BooleanField(default=False)
 
   SALES_ADMIN = 'SA'
@@ -84,8 +86,8 @@ class Lead(models.Model):
     (MEDIUM,'medium'),
     (SOLD,'sold')
   ]
-  state = models.CharField(max_length=4,choices=LEAD_STATE,null=True,blank=True,default=None)
-  user_id = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True,default=None)
+  state = models.CharField(max_length=4,choices=LEAD_STATE,null=True,blank=True)
+  user_id = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True)
 
 class Remark(models.Model):
   created_at = models.DateTimeField(auto_now_add=True)

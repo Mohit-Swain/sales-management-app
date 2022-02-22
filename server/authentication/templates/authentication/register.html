@@ -35,55 +35,24 @@
             {% csrf_token %}
 						<div class="row mb-3">
 							<div class="col">
-								<input
-									type="text"
-									class="form-control"
-									name="first_name"
-									placeholder="First name"
-								/>
+								{{form.first_name}}
 							</div>
 							<div class="col">
-								<input
-									type="text"
-									class="form-control"
-									name="last_name"
-									placeholder="Last name"
-								/>
-							</div>
+								{{form.last_name}}
+              </div>
 						</div>
 
 						<div class="mb-3">
-							<input
-								type="email"
-								class="form-control"
-								aria-describedby="emailHelp"
-								name="email"
-								placeholder="Enter email address"
-							/>
+							{{form.email}}
 						</div>
             <div class="mb-3">
-              <input
-                type="number"
-                class="form-control"
-                name="phone_no"
-                placeholder="Phone No."
-              />
+              {{form.phone_number}}
             </div>
 						<div class="mb-3">
-							<input
-								type="password"
-								class="form-control"
-								name="password"
-								placeholder="Enter Password"
-							/>
+							{{form.password1}}
 						</div>
 						<div class="mb-3">
-							<input
-								type="password"
-								class="form-control"
-								name="password1"
-								placeholder="Confirm Password"
-							/>
+							{{form.password2}}
 						</div>
 						<button type="submit" class="btn btn-primary w-100 my-4">
 							Register
