@@ -1,0 +1,5 @@
+<form action="{% url 'admin:approve' %}" method="POST">
+	{% csrf_token %}
+	<input name="pk" type="hidden" value="{{pk}}" />
+	<button class="btn" type="submit">Approve user</button>
+</form>

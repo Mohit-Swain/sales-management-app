@@ -4,28 +4,25 @@
 
 {%block title%}404 Page Not Found{%endblock%} 
 
-{%block extrameta%}
-<link rel="stylesheet" href="{% static 'css/404.css' %}" />
-{%endblock%} {%block navBar%} {{ block.super }} {%endblock%} {%block content%}
+{%block navBar%} {{ block.super }} {%endblock%} {%block content%}
 <section class="page_404">
-	<div class="container">
+	<div class="container d-flex flex-column align-items-center">
 		<div class="row">
-			<div class="col-sm-12">
-				<div class="col-sm-10 col-sm-offset-1 text-center">
-					<div class="four_zero_four_bg">
-						<h1 class="text-center">404</h1>
-					</div>
-
-					<div class="contant_box_404">
-						<h3 class="h2">Look like you're lost</h3>
-
-						<p>the page you are looking for not avaible!</p>
-
-						<a href="{% url 'home' %}" class="link_404">Go to Home</a>
-					</div>
-				</div>
-			</div>
+			<img
+				style="height: 70vh"
+				src="{% static 'not_found.svg'%}"
+				alt="404 svg"
+			/>
 		</div>
+		<div class="row mb-1">
+			<div class="h3">It's not you it's us</div>
+		</div>
+		<div class="row mb-1">
+			<div class="lead text-muted">We are working on resolving the issue</div>
+		</div>
+		<a class="text-decoration-none" href="{% url 'home' %}">
+			<button class="btn btn-primary rounded my-2">Go Home</button>
+		</a>
 	</div>
 </section>
 {%endblock%}
