@@ -52,13 +52,19 @@ class User(AbstractUser):
   manager_id = models.ForeignKey('self',
                                   on_delete=models.SET_NULL,
                                   null=True,
-                                  blank=True
+                                  blank=True,
+                                  help_text='Only Sales Admin'
                                 )
   profile = models.ImageField(null=True,blank=True)
   objects = MyUserManager()
 
   USERNAME_FIELD = 'email'
   REQUIRED_FIELDS = ['first_name','last_name']
+  def has_module_perms(self, app_label):
+    return self.is_superuser or self.is_staff
+
+  def has_perm(self, perm, obj=None):
+    return self.is_superuser or self.is_staff
 
   def __str__(self):
       return f'{self.first_name} {self.last_name} ({self.email})'
@@ -87,7 +93,10 @@ class Lead(models.Model):
     (SOLD,'sold')
   ]
   state = models.CharField(max_length=4,choices=LEAD_STATE,null=True,blank=True)
-  user_id = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True)
+  user_id = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True,help_text='Only Sales Representative')
+
+  def __str__(self) -> str:
+    return f'{self.name} ({self.email})'
 
 class Remark(models.Model):
   created_at = models.DateTimeField(auto_now_add=True)

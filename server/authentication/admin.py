@@ -20,7 +20,7 @@ class MyUserAdmin(UserAdmin):
       'fields' : ('first_name','last_name','email','is_approved','user_type','manager_id')
     }),
     ('Permissions',{
-      'fields' : ('is_staff','is_superuser')
+      'fields' : ('is_staff','is_superuser','user_permissions')
     }),('Meta data',{
       'fields' : ('last_login','password')
     })
@@ -67,7 +67,7 @@ class MyUserAdmin(UserAdmin):
       user = User.objects.get(pk=id)
       user.is_approved = True
       user.save()
-      self.message_user(request, 'Success')
+      self.message_user(request, f'Success, {user} is approved')
       return redirect('admin:authentication_user_changelist')
     except:
       self.message_user(request,'Some Error occured')
@@ -80,16 +80,71 @@ class MyUserAdmin(UserAdmin):
       user = User.objects.get(pk=id)
       user.is_approved = False
       user.save()
-      self.message_user(request, 'Success')
+      self.message_user(request, f'Success, {user} is not approved')
       return redirect('admin:authentication_user_changelist')
     except:
       self.message_user(request,'Some Error occured')
       return redirect('admin:authentication_user_changelist')
-
-
   
+  def has_view_permission(self, request, obj= None) -> bool:
+    user = request.user
+    return user.is_superuser
+  
+  def has_change_permission(self, request, obj = None) -> bool:
+    user = request.user
+    return user.is_superuser
+
+  def has_delete_permission(self, request, obj = None) -> bool:
+    user = request.user
+    return user.is_superuser
+  
+  def has_add_permission(self, request) -> bool:
+    user = request.user
+    return user.is_superuser
+
+  # Only show Sales admin as a manager
+  def render_change_form(self, request, context, *args, **kwargs):
+    context['adminform'].form.fields['manager_id'].queryset = User.objects.filter(user_type=User.SALES_ADMIN)
+    return super(MyUserAdmin, self).render_change_form(request, context, *args, **kwargs)
+  
+class MyLeadsAdmin(admin.ModelAdmin):
+
+  def render_change_form(self, request, context, *args, **kwargs):
+    context['adminform'].form.fields['user_id'].queryset = User.objects.filter(user_type=User.SALES_REPRESENTATIVE)
+    return super(MyLeadsAdmin, self).render_change_form(request, context, *args, **kwargs)
+
+class MyRemarksAdmin(admin.ModelAdmin):
+  #PERMISSIONS
+  def has_view_permission(self, request, obj= None) -> bool:
+    user = request.user
+    if user.is_superuser:
+      return True
+    if not obj or (obj and obj.user_id == user.id):
+      return True
+    return False
+  
+  def has_change_permission(self, request, obj = None) -> bool:
+    user = request.user
+    if user.is_superuser:
+      return True
+    if not obj or (obj and obj.user_id == user.id):
+      return True
+    return False
+
+  def has_delete_permission(self, request, obj = None) -> bool:
+    user = request.user
+    if user.is_superuser:
+      return True
+    if not obj or (obj and obj.user_id == user.id):
+      return True
+    return False
+
+  def render_change_form(self, request, context, *args, **kwargs):
+    user = request.user
+    context['adminform'].form.fields['user_id'].queryset = User.objects.filter(id = user.id)
+    return super(MyRemarksAdmin, self).render_change_form(request, context, *args, **kwargs)
 
 
 admin.site.register(User,MyUserAdmin)
-admin.site.register(Lead)
-admin.site.register(Remark)
+admin.site.register(Lead,MyLeadsAdmin)
+admin.site.register(Remark,MyRemarksAdmin)
