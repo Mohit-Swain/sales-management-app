@@ -3,8 +3,6 @@ from django.contrib.auth.admin import UserAdmin
 from django.shortcuts import redirect
 from django.urls import path, reverse
 from django.utils.html import format_html
-from django.template.loader import render_to_string
-from django.http import HttpResponseRedirect
 
 from .models import User, Lead, Remark
 from .forms import CustomUserChangeForm, CustomUserCreationForm
@@ -35,7 +33,7 @@ class MyUserAdmin(UserAdmin):
     )
   ordering = ('first_name','last_name','date_joined',)
   readonly_fields = ('last_login','date_joined','user_actions')
-  list_display = ('email','first_name', 'last_name','is_staff','is_superuser', 'is_approved','user_actions')
+  list_display = ('email','first_name', 'last_name','is_staff','is_superuser', 'is_approved','user_actions','user_type')
   search_fields = ('first_name', 'last_name', 'email')
 
   # CODE TO APPROVE USERS

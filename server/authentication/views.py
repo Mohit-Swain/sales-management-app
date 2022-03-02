@@ -3,7 +3,15 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .forms import CustomUserCreationForm, LoginForm
 from .models import User
+import requests
 # Create your views here.
+
+def dashboard(request):
+  users = requests.get('https://jsonplaceholder.typicode.com/users').json()
+  context = {
+    'leads' : users
+  }
+  return render(request,'dashboard.html',context)
 
 def homeView(request):
   return redirect('login')
