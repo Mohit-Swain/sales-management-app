@@ -26,8 +26,13 @@ def changeLeadStatusAPI(request,id):
 
 @login_required(login_url=reverse_lazy('login'))
 def dashboard(request):
-  # users = requests.get('https://jsonplaceholder.typicode.com/users').json()
-  leads = Lead.objects.filter(user_id=request.user.id)
+  leads = Lead.objects.filter(user_id=request.user.id).order_by('-created_at')
+  filter = request.GET.get('filter')
+  if filter:
+    if filter == 'NEW':
+      leads = leads.filter(state__isnull = True)
+    else:
+      leads = leads.filter(state=filter)
   p = Paginator(leads,10)
   page_number = request.GET.get('page')
   p_leads = p.get_page(page_number)
