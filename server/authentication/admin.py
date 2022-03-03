@@ -18,7 +18,7 @@ class MyUserAdmin(UserAdmin):
       'fields' : ('first_name','last_name','email','is_approved','user_type','manager_id')
     }),
     ('Permissions',{
-      'fields' : ('is_staff','is_superuser','user_permissions')
+      'fields' : ('is_staff','is_superuser')
     }),('Meta data',{
       'fields' : ('last_login','password')
     })

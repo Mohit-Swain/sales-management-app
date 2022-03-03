@@ -1,15 +1,50 @@
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.urls import reverse_lazy
 from .forms import CustomUserCreationForm, LoginForm
-from .models import User
-import requests
+from .models import Lead, User
+import json
 # Create your views here.
+@login_required(login_url=reverse_lazy('login'))
+def changeLeadStatusAPI(request,id):
+  if request.method == 'POST':
+    try:
+      body = json.loads(request.body)
+      lead = Lead.objects.get(id=id)
+      value = body.get('value')
+      lead.state = value
+      lead.save()
+      return JsonResponse({'success': True})
+    except Exception as e:
+      raise e
+      return JsonResponse({'error' : True, 'message' : str(e)})
+  return JsonResponse({'error' : True})
 
+@login_required(login_url=reverse_lazy('login'))
 def dashboard(request):
-  users = requests.get('https://jsonplaceholder.typicode.com/users').json()
+  # users = requests.get('https://jsonplaceholder.typicode.com/users').json()
+  leads = Lead.objects.filter(user_id=request.user.id)
+  status_text = {
+    Lead.HOT : 'Hot Lead',
+    Lead.COLD : 'Cold Lead',
+    Lead.MEDIUM : 'Med Lead',
+    Lead.GREY : 'Grey',
+    Lead.SUCCESS: 'Success'
+  }
+  status_bootstrap_color = {
+    Lead.HOT : 'danger',
+    Lead.COLD : 'info',
+    Lead.MEDIUM : 'warning',
+    Lead.GREY : 'secondary',
+    Lead.SUCCESS: 'success',
+  }
   context = {
-    'leads' : users
+    'leads' : leads,
+    'status_text' : status_text,
+    'status_bootstrap_color' : status_bootstrap_color
   }
   return render(request,'dashboard.html',context)
 

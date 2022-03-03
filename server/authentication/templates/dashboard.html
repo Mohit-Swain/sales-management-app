@@ -1,5 +1,7 @@
-{% extends 'base.html' %} {% load static %} {%block title%}Dashboard{%endblock%}
-{%block navBar%} {{ block.super }} {%endblock%} {%block content%}
+{% extends 'base.html' %} {% load static %} {% load helper_tags %}
+<!-- prettier ignore-->
+{%block title%}Dashboard{%endblock%} {%block navBar%} {{ block.super }}
+{%endblock%} {%block content%}
 <div class="container">
 	<div class="container-fluid my-3" style="background-color: #f6f8fa">
 		<div class="p-3 d-flex flex-row">
@@ -13,7 +15,6 @@
 			</div>
 			<div class="px-3">
 				<div class="text-black">
-					<!-- prettier-ignore -->
 					<span class="fw-bold"> Good Morning,</span>
 					{{ user.get_full_name | title}}
 				</div>
@@ -69,7 +70,7 @@
 				<th scope="row" class="fw-normal">{{lead.id}}</th>
 				<td>
 					<img
-						src="https://i.pravatar.cc/32?img={{lead.id}}"
+						src="https://i.pravatar.cc/32?user={{lead.name}}"
 						alt=""
 						srcset=""
 						class="h-100 rounded-circle"
@@ -77,13 +78,54 @@
 					<span class="mx-2"> {{lead.name | title}} </span>
 				</td>
 				<td>{{lead.email}}</td>
-				<td>{{lead.phone}}</td>
-				<td>{{lead.name}}</td>
-				<td>{{lead.username}}</td>
+				<td>{{lead.phone_number}}</td>
+				<td>{{lead.user_id.get_full_name}}</td>
+				{% with lead.state as status %}
+				<td>
+					<select
+						class="state-select form-select form-select-sm shadow-none btn btn-sm btn-outline-{{status_bootstrap_color | get_value:status | default:'primary'}}"
+						aria-label=".form-select-sm example"
+						onchange="changeHandler({{lead.id}},this.value)"
+					>
+						{% if not status %}
+						<option selected class="bg-light text-dark">New Lead</option>
+						{% endif %} {% for state in status_text %} {% if state == status %}
+						<option class="bg-light text-dark" value="{{state}}" selected>
+							{{status_text | get_value:state}}
+						</option>
+						{% else %}
+						<option class="bg-light text-dark" value="{{state}}">
+							{{status_text | get_value:state}}
+						</option>
+						{% endif %} {% endfor %}
+					</select>
+				</td>
+				{% endwith %}
 				<td><a href="" class="">view</a></td>
 			</tr>
 			{% endfor %}
 		</tbody>
 	</table>
 </div>
-{%endblock%}
+{%endblock%} {% block endscripts %}
+<script type="text/javascript">
+	async function changeHandler(id, value) {
+		const rawResponse = await fetch("api/changeleadstate/" + id, {
+			method: "POST",
+			headers: {
+				Accept: "application/json",
+				"Content-Type": "application/json",
+				"X-CSRFToken": "{{ csrf_token }}",
+			},
+			body: JSON.stringify({ value: value }),
+		});
+		const content = await rawResponse.json();
+		if (content.error) {
+			alert("Some error has occurred");
+		}
+		if (content.success) {
+			location.reload();
+		}
+	}
+</script>
+{% endblock%}

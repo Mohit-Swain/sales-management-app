@@ -6,5 +6,6 @@ urlpatterns = [
   path('login',views.loginView ,name='login'),
   path('logout',views.logoutView,name='logout'),
   path('register',views.registerView,name='register'),
-  path('dashboard',views.dashboard,name='dashboard')
+  path('dashboard',views.dashboard,name='dashboard'),
+  path('api/changeleadstate/<int:id>',views.changeLeadStatusAPI)
 ]

@@ -84,13 +84,15 @@ class Lead(models.Model):
   HOT = 'HOT'
   COLD = 'COLD'
   MEDIUM = 'MED'
-  SOLD = 'SOLD'
-  
+  GREY = 'GREY'
+  SUCCESS = 'SUCC'
+
   LEAD_STATE = [
     (HOT, 'hot'),
     (COLD,'cold'),
     (MEDIUM,'medium'),
-    (SOLD,'sold')
+    (GREY,'grey'),
+    (SUCCESS,'success')
   ]
   state = models.CharField(max_length=4,choices=LEAD_STATE,null=True,blank=True)
   user_id = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True,help_text='Only Sales Representative')
