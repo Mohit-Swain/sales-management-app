@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse_lazy
+from django.core.paginator import Paginator
 from .forms import CustomUserCreationForm, LoginForm
 from .models import Lead, User
 import json
@@ -27,6 +28,9 @@ def changeLeadStatusAPI(request,id):
 def dashboard(request):
   # users = requests.get('https://jsonplaceholder.typicode.com/users').json()
   leads = Lead.objects.filter(user_id=request.user.id)
+  p = Paginator(leads,10)
+  page_number = request.GET.get('page')
+  p_leads = p.get_page(page_number)
   status_text = {
     Lead.HOT : 'Hot Lead',
     Lead.COLD : 'Cold Lead',
@@ -42,7 +46,7 @@ def dashboard(request):
     Lead.SUCCESS: 'success',
   }
   context = {
-    'leads' : leads,
+    'leads' : p_leads,
     'status_text' : status_text,
     'status_bootstrap_color' : status_bootstrap_color
   }
