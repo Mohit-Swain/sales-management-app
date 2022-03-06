@@ -68,6 +68,10 @@ class User(AbstractUser):
 
   def __str__(self):
       return f'{self.first_name} {self.last_name} ({self.email})'
+  
+  @property
+  def full_name(self):
+    return self.get_full_name
 
 
 

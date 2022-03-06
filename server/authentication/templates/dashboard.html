@@ -7,7 +7,7 @@
 		<div class="p-3 d-flex flex-row">
 			<div style="height: 48px">
 				<img
-					src="https://i.pravatar.cc/50"
+					src="https://i.pravatar.cc/50?user={{user.email}}"
 					alt=""
 					srcset=""
 					class="h-100 rounded-circle"
@@ -121,7 +121,15 @@
 					</select>
 				</td>
 				{% endwith %}
-				<td><a href="" class="">view</a></td>
+				<td>
+					<p
+						class="text-decoration-none text-primary"
+						onclick="showModal({{lead.id}})"
+						role="button"
+					>
+						View
+					</p>
+				</td>
 			</tr>
 			{% endfor %}
 		</tbody>
@@ -161,6 +169,41 @@
 		</ul>
 	</nav>
 </div>
+<!-- Modal -->
+<div
+	class="modal fade"
+	id="myModal"
+	data-bs-backdrop="static"
+	data-bs-keyboard="false"
+	tabindex="-1"
+	aria-labelledby="myModalLabel"
+	aria-hidden="true"
+>
+	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="myModalLabel">Remarks List</h5>
+				<button
+					type="button"
+					class="btn-close"
+					data-bs-dismiss="modal"
+					aria-label="Close"
+				></button>
+			</div>
+			<div class="modal-body" id="modalBody"></div>
+			<div class="modal-footer justify-content-center">
+				<button
+					type="button"
+					id="saveModal"
+					class="btn btn-primary btn-block col-12"
+				>
+					Save and exit
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
 {%endblock%} {% block endscripts %}
 <script type="text/javascript">
 	async function changeHandler(id, value) {
@@ -179,6 +222,123 @@
 		}
 		if (content.success) {
 			location.reload();
+		}
+	}
+
+	function formatAMPM(dateStr) {
+		var date = new Date(dateStr);
+		var currDate = date.getDate();
+		var hours = date.getHours();
+		var dayName = getDayName(date.getDay());
+		var minutes = date.getMinutes();
+		var monthName = getMonthName(date.getMonth());
+		var year = date.getFullYear();
+		var ampm = hours >= 12 ? "pm" : "am";
+		hours = hours % 12;
+		hours = hours ? hours : 12; // the hour '0' should be '12'
+		minutes = minutes < 10 ? "0" + minutes : minutes;
+		var strTime =
+			currDate +
+			" " +
+			monthName +
+			" " +
+			year +
+			",  " +
+			hours +
+			":" +
+			minutes +
+			" " +
+			ampm;
+		return strTime;
+	}
+
+	function getMonthName(month) {
+		var ar = new Array(
+			"January",
+			"February",
+			"March",
+			"April",
+			"May",
+			"June",
+			"July",
+			"August",
+			"September",
+			"October",
+			"November",
+			"December"
+		);
+		return ar[month];
+	}
+
+	function getDayName(day) {
+		var ar1 = new Array("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat");
+		return ar1[day];
+	}
+
+	async function postRemark(id, newRemark) {
+		const rawResponse = await fetch("api/addRemark/" + id, {
+			method: "POST",
+			headers: {
+				Accept: "application/json",
+				"Content-Type": "application/json",
+				"X-CSRFToken": "{{ csrf_token }}",
+			},
+			body: JSON.stringify({ remark: newRemark }),
+		});
+		JsonResponse = await rawResponse.json();
+		console.log(JsonResponse);
+	}
+	async function showModal(id) {
+		const modal = document.getElementById("myModal");
+		const myModal = new bootstrap.Modal(modal, {
+			keyboard: false,
+			backdrop: "static",
+		});
+		const body = document.getElementById("modalBody");
+
+		const rawResponse = await fetch("api/getRemarks/" + id);
+		const response = await rawResponse.json();
+		if (response.error) {
+			alert("Some error has occurred");
+		} else {
+			modalBody = "";
+			response.remarks.forEach((remark) => {
+				const createdDate = formatAMPM(remark.created_at);
+				modalBody += `
+	           <div class="p-3 d-flex flex-row">
+	             <div style="height: 48px">
+	               <img
+	               src="https://i.pravatar.cc/50?user=${remark.user_id__email}"
+	               alt=""
+	               srcset=""
+	               class="h-100 rounded-circle"
+	               />
+	             </div>
+                <div class="px-3 col-11">
+                  <div class="text-black fw-bold">
+                    ${remark.user_id__first_name} ${remark.user_id__last_name}
+                  </div>
+                  <div class="text-secondary">
+                    ${createdDate}
+                  </div>
+                  <div class="border rounded p-2 text-muted mt-1">${remark.remark}</div>
+	             </div>
+	           </div>
+	         `;
+			});
+			modalBody += `<div class="p-3"><textarea class="form-control" id="remarkTextArea" rows="3" placeholder="Add New Remark" style="resize:none;"></textarea></div>`;
+			body.innerHTML = modalBody;
+
+			const save = document.getElementById("saveModal");
+			const remarkTextArea = document.getElementById("remarkTextArea");
+
+			save.onclick = function () {
+				const newRemark = remarkTextArea.value.trim();
+				postRemark(id, newRemark);
+				myModal.hide();
+			};
+
+			myModal.show();
 		}
 	}
 </script>

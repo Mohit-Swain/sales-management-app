@@ -1,3 +1,4 @@
+from distutils.log import error
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth import authenticate, login, logout
@@ -6,9 +7,31 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from django.core.paginator import Paginator
 from .forms import CustomUserCreationForm, LoginForm
-from .models import Lead, User
+from .models import Lead, User, Remark
 import json
 # Create your views here.
+@login_required(login_url=reverse_lazy('login'))
+def addRemark(request,id):
+  if request.method == 'POST':
+    try:
+      body = json.loads(request.body)
+      new_remark = body.get('remark')
+      if not new_remark:
+        return JsonResponse({'error' : True, 'message' : "empty remark can't be added"})
+      Remark.objects.create(remark=new_remark,lead_id=Lead.objects.get(id=id),user_id=request.user)
+      return JsonResponse({'success': True})
+    except Exception as e:
+      return JsonResponse({'error' : True, 'message' : str(e)})
+  return JsonResponse({'error' : True})
+
+@login_required(login_url=reverse_lazy('login'))
+def getRemarks(request,id):
+  if request.method == 'GET':
+    remarks = Remark.objects.filter(lead_id = id)
+    remarks = list(remarks.values('remark','lead_id','user_id','created_at','user_id__first_name','user_id__last_name','user_id__email'))
+    return JsonResponse({'remarks' : remarks})
+  return JsonResponse({error : True})
+
 @login_required(login_url=reverse_lazy('login'))
 def changeLeadStatusAPI(request,id):
   if request.method == 'POST':
@@ -20,7 +43,6 @@ def changeLeadStatusAPI(request,id):
       lead.save()
       return JsonResponse({'success': True})
     except Exception as e:
-      raise e
       return JsonResponse({'error' : True, 'message' : str(e)})
   return JsonResponse({'error' : True})
 
