@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'authentication',
+    'main_app',
     'server.apps.MyAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
