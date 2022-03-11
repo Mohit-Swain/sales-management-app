@@ -1,9 +1,12 @@
+import imp
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from authentication.models import Remark, Lead
+from authentication.models import Remark, Lead, User
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.core.paginator import Paginator
+from django.db.models import Count, Q
+from datetime import datetime, timedelta
 import json
 
 # Create your views here.
@@ -83,3 +86,24 @@ def dashboard(request):
     'status_bootstrap_color' : status_bootstrap_color
   }
   return render(request,'main_app/dashboard.html',context)
+
+def getLeadCountsAPI(request):
+  last_three_month = datetime.today() - timedelta(days=90)
+  last_three_month_leads = Lead.objects.filter(created_at__gte=last_three_month)
+  HOT_COUNT = last_three_month_leads.filter(state=Lead.HOT).count()
+  MEDIUM_COUNT = last_three_month_leads.filter(state=Lead.MEDIUM).count()
+  COLD_COUNT = last_three_month_leads.filter(state=Lead.COLD).count()
+  return JsonResponse({
+    'Hot' : HOT_COUNT,
+    'Medium' : MEDIUM_COUNT,
+    'Cold' : COLD_COUNT
+  })
+
+def getTopSalesRepAPI(request):
+  last_month = datetime.today() - timedelta(days=30)
+  top_users = User.objects \
+        .annotate(success_count=Count('lead',filter= Q(lead__state=Lead.SUCCESS) & Q(lead__updated_at__gte=last_month)))\
+        .order_by('-success_count') \
+        .values('id','first_name','last_name','email','success_count')[:10]
+
+  return JsonResponse({'success': True,'sales_representatives': list(top_users)})

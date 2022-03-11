@@ -102,7 +102,8 @@ class MyUserAdmin(UserAdmin):
 
   # Only show Sales admin as a manager
   def render_change_form(self, request, context, *args, **kwargs):
-    context['adminform'].form.fields['manager_id'].queryset = User.objects.filter(user_type=User.SALES_ADMIN)
+    if 'manager_id' in context['adminform'].form.fields:
+      context['adminform'].form.fields['manager_id'].queryset = User.objects.filter(user_type=User.SALES_ADMIN)
     return super(MyUserAdmin, self).render_change_form(request, context, *args, **kwargs)
   
 class MyLeadsAdmin(admin.ModelAdmin):
@@ -112,6 +113,7 @@ class MyLeadsAdmin(admin.ModelAdmin):
     return super(MyLeadsAdmin, self).render_change_form(request, context, *args, **kwargs)
 
 class MyRemarksAdmin(admin.ModelAdmin):
+  list_display = ('lead_id','user_id','remark')
   #PERMISSIONS
   def has_view_permission(self, request, obj= None) -> bool:
     user = request.user

@@ -16,7 +16,7 @@ def loginView(request):
       else:
         login(request,user)
         messages.success(request,f"You are Successfully logged in as {user.get_full_name()}")
-        return redirect('login')
+        return redirect('home')
     else:
       for error_field in form.errors:
         for error in form.errors[error_field]:
@@ -32,7 +32,6 @@ def registerView(request):
   if request.method == 'POST':
     form = CustomUserCreationForm(request.POST)
     if form.is_valid():
-      print(form.cleaned_data)
       user = User(first_name = form.cleaned_data['first_name'],
                   last_name=form.cleaned_data['last_name'],
                   email = form.cleaned_data['email'],

@@ -1,4 +1,4 @@
 from django.contrib import admin
 
 class MyAdminSite(admin.AdminSite):
-    site_header = 'Leads'
+    site_header = 'Leads Management Platform'
