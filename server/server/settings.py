@@ -139,3 +139,5 @@ AUTH_USER_MODEL = 'authentication.User'
 MESSAGE_TAGS ={
   messages.ERROR : 'danger'
 }
+
+CSRF_TRUSTED_ORIGINS = ['https://ablejobs-sales.herokuapp.com']
