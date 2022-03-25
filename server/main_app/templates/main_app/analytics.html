@@ -1,0 +1,235 @@
+{% extends 'base.html' %} {% load static %} {% load helper_tags %}
+<!-- prettier ignore-->
+{%block title%}Analytics{%endblock%} {%block navBar%} {{ block.super }}
+{%endblock%} {%block content%}
+<div class="container">
+	<div class="container-fluid my-3" style="background-color: #f6f8fa">
+		<div class="p-3 d-flex flex-row">
+			<div style="height: 48px">
+				<img
+					src="https://i.pravatar.cc/50?user={{user.email}}"
+					alt=""
+					srcset=""
+					class="h-100 rounded-circle"
+				/>
+			</div>
+			<div class="px-3">
+				<div class="text-black">
+					<span class="fw-bold"> Good Morning,</span>
+					{{ user.get_full_name | title}}
+				</div>
+				<div class="text-secondary">
+					Here's how your dashboard looks like today!
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-12 col-lg-7">
+			<div class="row row-cols-2">
+				<div class="col-6 p-2 d-flex justify-content-center">
+					<div
+						class="w-75 p-3 d-flex justify-content-between rounded"
+						style="background-color: #f6f8fa"
+					>
+						<div>
+							<div class="h3" id="total_leads">0</div>
+							<div class="text-secondary">Total Leads</div>
+						</div>
+						<img
+							class="align-self-center"
+							src="{% static 'main_app/total_leads.svg' %}"
+							alt="total leads"
+						/>
+					</div>
+				</div>
+				<div class="col-6 p-2 d-flex justify-content-center">
+					<div
+						class="w-75 p-3 d-flex justify-content-between rounded"
+						style="background-color: #f6f8fa"
+					>
+						<div>
+							<div class="h3" id="hot_leads">0</div>
+							<div class="text-secondary">Hot Leads</div>
+						</div>
+						<img
+							class="align-self-center"
+							src="{% static 'main_app/hot_lead.svg' %}"
+							alt="Hot leads"
+						/>
+					</div>
+				</div>
+				<div class="col-6 p-2 d-flex justify-content-center">
+					<div
+						class="w-75 p-3 d-flex justify-content-between rounded"
+						style="background-color: #f6f8fa"
+					>
+						<div>
+							<div class="h3" id="med_leads">0</div>
+							<div class="text-secondary">Medium Leads</div>
+						</div>
+						<img
+							class="align-self-center"
+							src="{% static 'main_app/med_lead.svg' %}"
+							alt="medium leads"
+						/>
+					</div>
+				</div>
+				<div class="col-6 p-2 d-flex justify-content-center">
+					<div
+						class="w-75 p-3 d-flex justify-content-between rounded"
+						style="background-color: #f6f8fa"
+					>
+						<div>
+							<div class="h3" id="grey_leads">0</div>
+							<div class="text-secondary">Grey Leads</div>
+						</div>
+						<img
+							class="align-self-center"
+							src="{% static 'main_app/grey_lead.svg' %}"
+							alt="grey lead"
+						/>
+					</div>
+				</div>
+			</div>
+			<div class="border rounded p-3 container">
+				<div class="d-flex justify-content-between">
+					<div class="h5">Leads Stastics</div>
+					<div class="">
+						<select
+							class="form-select form-select-sm"
+							aria-label="select chat data"
+						>
+							<option selected>Last 7 days</option>
+						</select>
+					</div>
+				</div>
+				<div>
+					<canvas id="leadsChat" height="300"></canvas>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-lg-5 d-flex justify-content-center">
+			<table class="table table-hover table-borderless">
+				<thead>
+					<tr class="text-muted">
+						<th scope="col" class="fw-normal">Rank</th>
+						<th scope="col" class="fw-normal" class="w-50">Full Name</th>
+						<th scope="col" class="fw-normal">Leads Converted</th>
+					</tr>
+				</thead>
+				<tbody style="font-weight: 600" id="topSalesRep"></tbody>
+			</table>
+		</div>
+	</div>
+</div>
+{%endblock%} {% block endscripts %}
+<script type="text/javascript">
+	function updateLeads() {
+		fetch("/api/getLeadCounts")
+			.then((response) => response.json())
+			.then((data) => {
+				for (keys in data) {
+					element = document.getElementById(keys);
+					element.innerText = data[keys];
+				}
+			})
+			.catch(() => alert("Some error in fetching leads count"));
+	}
+	function updateTopSalesRep() {
+		fetch("/api/getTopSalesRep")
+			.then((response) => response.json())
+			.then((data) => {
+				let counter = 1;
+				let tbodyElem = document.getElementById("topSalesRep");
+				tbodyElem.innerHTML = "";
+				for (sales_rep of data.sales_representatives) {
+					let record = `<tr><td>#${counter}</td>
+	           <td>
+	             <img alt="profile pic" class="rounded-circle" src="https://i.pravatar.cc/32?user=${sales_rep.first_name}"/>
+	             <span class="mx-2">${sales_rep.first_name} ${sales_rep.last_name}</span>
+	           </td>
+	           <td>${sales_rep.success_count}</td></tr>`;
+					tbodyElem.innerHTML += record;
+					counter++;
+				}
+			})
+			.catch(() => alert("Some error in getting top Sales Represnetative"));
+	}
+
+	function createLeadsChat() {
+		const leadCanvas = document.getElementById("leadsChat");
+		fetch("/api/getDailyStastics")
+			.then((response) => response.json())
+			.then((data) => {
+				console.log(data.days);
+				let myChart = new Chart(leadCanvas, {
+					type: "bar",
+					data: {
+						labels: data.days,
+						datasets: [
+							{
+								label: "Hot",
+								backgroundColor: "#FD4646",
+								data: data.hot,
+							},
+							{
+								label: "Med",
+								backgroundColor: "#28A745",
+								data: data.med,
+							},
+							{
+								label: "Grey",
+								backgroundColor: "#007BFF",
+								data: data.grey,
+							},
+						],
+					},
+					options: {
+						tooltips: {
+							displayColors: true,
+							callbacks: {
+								mode: "x",
+							},
+						},
+						scales: {
+							x: {
+								stacked: true,
+								grid: {
+									display: false,
+								},
+							},
+							y: {
+								stacked: true,
+								beginAtZero: true,
+							},
+						},
+						responsive: true,
+						maintainAspectRatio: false,
+						legend: { position: "bottom" },
+						layout: {
+							padding: 20,
+						},
+						barThickness: 16,
+						plugins: {
+							legend: {
+								position: "bottom",
+								labels: {
+									usePointStyle: true,
+								},
+							},
+						},
+					},
+				});
+			})
+			.catch((e) => {
+				alert("Some error in generating lead Stastics chat");
+				console.log(e);
+			});
+	}
+
+	updateLeads();
+	updateTopSalesRep();
+	createLeadsChat();
+</script>
+{%endblock%}

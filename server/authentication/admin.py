@@ -107,7 +107,7 @@ class MyUserAdmin(UserAdmin):
     return super(MyUserAdmin, self).render_change_form(request, context, *args, **kwargs)
   
 class MyLeadsAdmin(admin.ModelAdmin):
-  list_display = ('name','email','phone_number','state')
+  list_display = ('name','email','user_id','phone_number','state')
   def render_change_form(self, request, context, *args, **kwargs):
     context['adminform'].form.fields['user_id'].queryset = User.objects.filter(user_type=User.SALES_REPRESENTATIVE)
     return super(MyLeadsAdmin, self).render_change_form(request, context, *args, **kwargs)

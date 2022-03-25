@@ -4,16 +4,23 @@ from django.http import JsonResponse
 from authentication.models import Remark, Lead, User
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
+from django.utils.timezone import utc
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
+from django.db.models.functions import TruncDay
 from datetime import datetime, timedelta
 import json
 
 # Create your views here.
 def homeView(request):
   if request.user.is_authenticated:
+    if request.user.is_superuser:
+      return redirect('analytics')
     return redirect('dashboard')
   return redirect('login')
+
+def analyticsView(request):
+  return render(request,'main_app/analytics.html')
 
 @login_required(login_url=reverse_lazy('login'))
 def addRemark(request,id):
@@ -88,22 +95,63 @@ def dashboard(request):
   return render(request,'main_app/dashboard.html',context)
 
 def getLeadCountsAPI(request):
-  last_three_month = datetime.today() - timedelta(days=90)
+  now = datetime.utcnow().replace(tzinfo=utc)
+  last_three_month = now - timedelta(days=90)
   last_three_month_leads = Lead.objects.filter(created_at__gte=last_three_month)
+  TOTAL_COUNT = last_three_month_leads.count()
   HOT_COUNT = last_three_month_leads.filter(state=Lead.HOT).count()
   MEDIUM_COUNT = last_three_month_leads.filter(state=Lead.MEDIUM).count()
-  COLD_COUNT = last_three_month_leads.filter(state=Lead.COLD).count()
+  GREY_COUNT = last_three_month_leads.filter(state=Lead.GREY).count()
   return JsonResponse({
-    'Hot' : HOT_COUNT,
-    'Medium' : MEDIUM_COUNT,
-    'Cold' : COLD_COUNT
+    'total_leads' : TOTAL_COUNT,
+    'hot_leads' : HOT_COUNT,
+    'med_leads' : MEDIUM_COUNT,
+    'grey_leads' : GREY_COUNT
   })
 
 def getTopSalesRepAPI(request):
-  last_month = datetime.today() - timedelta(days=30)
+  now = datetime.utcnow().replace(tzinfo=utc)
+  last_month = now - timedelta(days=30)
   top_users = User.objects \
         .annotate(success_count=Count('lead',filter= Q(lead__state=Lead.SUCCESS) & Q(lead__updated_at__gte=last_month)))\
         .order_by('-success_count') \
         .values('id','first_name','last_name','email','success_count')[:10]
 
   return JsonResponse({'success': True,'sales_representatives': list(top_users)})
+
+def getDailyLeadStatistics(request):
+  today = datetime.today().replace(tzinfo=utc)
+  enddate = TruncDay(today + timedelta(days=1))
+  startdate = TruncDay(today - timedelta(days=6))
+  
+  query = Lead.objects \
+            .annotate(day=TruncDay('updated_at')) \
+            .filter(day__range=[startdate,enddate]) \
+            .values('state','day') \
+            .annotate(count_state=Count('state')) \
+            .order_by('day')
+
+  query = list(query)
+  result = {}
+  for item in query:
+    hash = item['day'].strftime('%d/%m')
+    if not hash in result:
+      result[hash] = {}
+    result[hash][item['state']] = item['count_state']
+
+  modified_result = {
+    'days': [],
+    'hot' : [],
+    'med' : [],
+    'grey' : []
+  }
+  for item in result:
+    modified_result['days'].append(item)
+    modified_result['hot'].append(result[item].get(Lead.HOT,0))
+    modified_result['med'].append(result[item].get(Lead.MEDIUM,0))
+    modified_result['grey'].append(result[item].get(Lead.GREY,0))
+
+
+
+  
+  return JsonResponse(modified_result,safe=False)
